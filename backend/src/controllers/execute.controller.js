@@ -35,7 +35,6 @@ export async function executeSQL(req, res) {
       fields,
       duration,
     });
-    
   } catch (err) {
     return res.status(400).json({
       ok: false,

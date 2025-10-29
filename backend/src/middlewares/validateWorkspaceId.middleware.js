@@ -1,5 +1,5 @@
 export default function validateWorkspaceId(req, res, next) {
-  const { workspaceId } = req.params;
+  const workspaceId = req.params.workspaceId || req.body.workspaceId;
 
   if (!workspaceId) {
     return res

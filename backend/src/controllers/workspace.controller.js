@@ -92,28 +92,66 @@ export const loadWorkspace = async (req, res) => {
 export const saveWorkspace = async (req, res) => {
   try {
     const { workspaceId, schemaName: schema } = req;
-    const tableNames = await listTablesInSchema(schema);
+    const { name = `Workspace ${workspaceId}`, tables = [] } = req.body;
 
-    const tables = [];
-    for (const t of tableNames) {
-      const columns = await getColumnsForTable(schema, t);
-      const rows = await getRowsForTable(schema, t);
-      tables.push({ tableName: t, columns, rows });
+    if (!Array.isArray(tables)) {
+      return res
+        .status(400)
+        .json({ ok: false, error: "Invalid tables format" });
     }
 
-    const payload = {
-      workspaceId,
-      name: req.body.name || `Workspace ${workspaceId}`,
-      tables,
-    };
+    await transaction(async (client) => {
+      await client.query(
+        `CREATE SCHEMA IF NOT EXISTS ${escapeIdentifier(schema)};`
+      );
+      await client.query(`SET search_path TO ${escapeIdentifier(schema)};`);
 
-    const doc = await Workspace.findOneAndUpdate(
-      { workspaceId },
-      { $set: payload },
-      { upsert: true, new: true }
-    );
+      for (const tbl of tables) {
+        const tableName = escapeIdentifier(tbl.tableName);
 
-    res.json({ ok: true, workspace: doc });
+        await client.query(createTableSQL({ ...tbl, ifNotExists: true }));
+
+        const existingCols = await getColumnsForTable(schema, tbl.tableName);
+        const existingNames = new Set(existingCols.map((c) => c.columnName));
+
+        for (const col of tbl.columns) {
+          await client.query(
+            `ALTER TABLE ${tableName} 
+     ADD COLUMN IF NOT EXISTS ${escapeIdentifier(col.columnName)} ${
+              col.dataType
+            };`
+          );
+        }
+
+        const inserts = insertsForTable(tbl);
+        for (const ins of inserts) {
+          await client.query(ins.text, ins.values);
+        }
+      }
+    });
+
+    let existing = await Workspace.findOne({ workspaceId });
+
+    if (!existing) {
+      existing = await Workspace.create({ workspaceId, name, tables });
+    } else {
+      const tableMap = new Map();
+
+      for (const t of existing.tables) {
+        tableMap.set(t.tableName, t);
+      }
+
+      for (const t of tables) {
+        tableMap.set(t.tableName, t);
+      }
+
+      existing.name = name;
+      existing.tables = Array.from(tableMap.values());
+
+      await existing.save();
+    }
+
+    res.json({ ok: true, workspace: existing });
   } catch (err) {
     console.error("❌ Save Error:", err);
     res.status(500).json({ ok: false, error: err.message });
