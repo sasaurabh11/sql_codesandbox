@@ -8,6 +8,7 @@ import { connectPostgres } from "./db/postgres.js";
 
 import workspaceRouter from "./routes/workspace.routes.js";
 import executeRoutes from "./routes/execute_sql.routes.js";
+import llmRoutes from './routes/llm.routes.js'
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(bodyParser.json({ limit: "5mb" }));
 
 app.use("/api/workspaces", workspaceRouter);
 app.use("/api/execute", executeRoutes);
+app.use("/api/ai", llmRoutes);
 
 app.get("/", (req, res) => res.send({ ok: true, message: "backend running" }));
 
