@@ -92,7 +92,7 @@ export const explainSQL = async (sql) => {
 
 export const completeSQL = async (prefix) => {
   try {
-    const res = await axios.post(`${BASE}/api/ai/prefix`, { prefix });
+    const res = await axios.post(`${BASE}/api/ai/complete`, { prefix });
     return formatResponse(true, res);
   } catch (error) {
     return formatResponse(false, error);
