@@ -1,0 +1,46 @@
+CREATE TABLE employees (
+  id INT PRIMARY KEY,
+  name VARCHAR(50),
+  salary INT
+);
+
+INSERT INTO employees (id, name, salary)
+VALUES (1, 'Saurabh', 20000),
+       (2, 'Rahul', 25000),
+       (3, 'Priya', 30000);
+
+SELECT * FROM employees;
+
+SELECT name, salary FROM employees WHERE salary > 22000;
+
+UPDATE employees 
+SET salary = 28000 
+WHERE id = 1;
+
+SELECT * FROM employees WHERE id = 1;
+
+DELETE FROM employees WHERE id = 2;
+
+SELECT * FROM employees;
+
+ALTER TABLE employees ADD COLUMN department VARCHAR(50);
+
+UPDATE employees SET department = 'Engineering' WHERE id = 1;
+
+CREATE TABLE departments (
+  dept_id INT PRIMARY KEY,
+  dept_name VARCHAR(50)
+);
+
+INSERT INTO departments VALUES (1, 'Engineering'), (2, 'HR');
+
+SELECT e.name, e.salary, d.dept_name
+FROM employees e
+LEFT JOIN departments d ON e.department = d.dept_name;
+
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'employees';
+
+
+SELEC * FROM employees;
