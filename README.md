@@ -9,6 +9,7 @@ A full‑stack SQL sandbox that lets you create isolated workspaces, define sche
 - AI: Google Generative AI (Gemini / Gemma models)
 
 ## High‑Level Architecture
+![Architecture Flow Diagram](assets/diagram.png)
 - Client (SPA): The React app renders the SQL editor, schema builder, result viewer, and workspace manager. It calls REST endpoints on the backend.
 - API (Express): Exposes REST endpoints under `/api` for workspace lifecycle, SQL execution, and AI utilities.
 - PostgreSQL: Each workspace is mapped to a dedicated schema named `workspace_<workspaceId>`. All SQL is executed with the session `search_path` set to that schema.
