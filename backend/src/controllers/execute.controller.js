@@ -66,6 +66,12 @@ export async function executeSQL(req, res) {
       rowCount: result.rowCount ?? 0,
       fields,
       duration,
+      command: result.command, 
+      message: result.command
+        ? `${result.command} executed${
+            result.rowCount ? ` (${result.rowCount} rows affected)` : ""
+          }`
+        : "Query executed successfully",
     });
   } catch (err) {
     return res.status(400).json({

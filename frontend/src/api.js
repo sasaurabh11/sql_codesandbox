@@ -46,7 +46,6 @@ export const loadWorkspace = async (id) => {
 
 export const saveWorkspace = async (id, body = {}) => {
   try {
-    console.log("body", body);
     const res = await axios.post(`${BASE}/api/workspaces/${id}/save`, body);
     return formatResponse(true, res);
   } catch (error) {

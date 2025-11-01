@@ -28,7 +28,7 @@ async function startServer() {
     await Promise.all([connectMongo(), connectPostgres()]);
 
     app.listen(port, () => {
-      console.log(`🚀 Server running on port ${port}`);
+      console.log(`🚀 Server running on http://localhost:${port}`);
     });
   } catch (err) {
     console.error("❌ Failed to start application:", err.message);

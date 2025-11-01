@@ -13,7 +13,7 @@ export default function ResultViewer({ result }) {
         </div>
       </div>
     );
-    
+
   if (!result.ok)
     return (
       <div className="h-full p-6 bg-red-900/20 border border-red-500 rounded-lg text-red-300">
@@ -26,6 +26,11 @@ export default function ResultViewer({ result }) {
         <div className="font-mono text-sm bg-red-900/30 p-3 rounded-lg border border-red-800">
           {result.error || JSON.stringify(result)}
         </div>
+        {result.duration && (
+          <div className="mt-3 text-sm text-red-400">
+            Execution time: <span className="font-mono">{result.duration}ms</span>
+          </div>
+        )}
       </div>
     );
 
@@ -35,6 +40,25 @@ export default function ResultViewer({ result }) {
       ? Object.keys(rows[0])
       : (result.fields || []).map((f) => f.name);
 
+  if (rows.length === 0 && result.command) {
+    return (
+      <div className="h-full p-6 bg-gray-800 border border-gray-700 rounded-lg text-gray-300">
+        <h3 className="font-semibold mb-3 text-green-400">✔ Query Executed</h3>
+        <p className="font-mono text-sm bg-gray-900/40 p-3 rounded mb-3">
+          {result.message ||
+            `${result.command} executed${
+              result.rowCount ? ` (${result.rowCount} rows affected)` : ""
+            }`}
+        </p>
+        {result.duration && (
+          <div className="text-sm text-gray-400">
+            Execution time: <span className="font-mono text-green-400">{result.duration}ms</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 min-h-0 overflow-auto">
@@ -43,8 +67,8 @@ export default function ResultViewer({ result }) {
             <thead>
               <tr className="bg-gray-700 sticky top-0">
                 {fields.map((f, i) => (
-                  <th 
-                    key={i} 
+                  <th
+                    key={i}
                     className="border-r border-gray-600 px-4 py-3 text-left font-semibold text-gray-200 last:border-r-0 hover:bg-gray-650 transition-colors"
                   >
                     <div className="flex items-center space-x-2">
@@ -59,15 +83,12 @@ export default function ResultViewer({ result }) {
             </thead>
             <tbody>
               {rows.map((r, ri) => (
-                <tr 
-                  key={ri} 
+                <tr
+                  key={ri}
                   className="border-t border-gray-600 hover:bg-gray-750 transition-colors duration-150"
                 >
                   {fields.map((f, fi) => (
-                    <td 
-                      key={fi} 
-                      className="border-r border-gray-600 px-4 py-3 last:border-r-0"
-                    >
+                    <td key={fi} className="border-r border-gray-600 px-4 py-3 last:border-r-0">
                       <span className="text-gray-200 font-mono text-xs">
                         {String(r[f] ?? "").substring(0, 100)}
                         {String(r[f] ?? "").length > 100 ? "..." : ""}
@@ -82,22 +103,27 @@ export default function ResultViewer({ result }) {
 
         {rows.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
             No data returned from query
           </div>
         )}
       </div>
-      
+
       <div className="flex-shrink-0 p-4 border-t border-gray-700 bg-gray-800">
         <div className="flex items-center justify-between text-sm text-gray-400">
           <div>
             <span className="font-semibold text-blue-400">{result.rowCount}</span> rows •{" "}
             <span className="font-semibold text-green-400">{fields.length}</span> columns
+            {result.duration && (
+              <span className="ml-4">
+                • <span className="font-semibold text-purple-400">{result.duration}ms</span>
+              </span>
+            )}
           </div>
-          <div>
-            Query executed successfully
+          <div className="flex items-center space-x-4">
+            {result.message && (
+              <span className="text-green-400">{result.message}</span>
+            )}
+            <span>Query executed successfully</span>
           </div>
         </div>
       </div>
